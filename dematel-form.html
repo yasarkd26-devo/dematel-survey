@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEMATEL Survey - Direct Influence Matrix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a6e 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+
+        .section-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .instruction-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .instruction-box p {
+            color: #1565c0;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .instruction-box strong {
+            font-weight: 600;
+        }
+
+        .rating-legend {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .rating-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .rating-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #2c5aa0;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .rating-item span:last-child {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .expert-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .expert-info h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #1e3a6e;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+
+        .matrix-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .matrix-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1e3a6e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 900px;
+        }
+
+        thead {
+            background: #1e3a6e;
+            color: white;
+        }
+
+        th {
+            padding: 16px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid #ddd;
+        }
+
+        th:first-child {
+            text-align: left;
+            background: #2c5aa0;
+            min-width: 250px;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background: #e3f2fd;
+        }
+
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        td:first-child {
+            text-align: left;
+            font-weight: 500;
+            background: #e8eef5;
+            color: #1e3a6e;
+            font-size: 14px;
+        }
+
+        select.matrix-select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        select.matrix-select:hover:not(:disabled) {
+            border-color: #2c5aa0;
+        }
+
+        select.matrix-select:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+
+        select.matrix-select:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .submit-container {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a6e 100%);
+            color: white;
+            padding: 16px 48px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(44, 90, 160, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 90, 160, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message,
+        .error-message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .rating-legend {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="section-badge">SECTION B</div>
+            <h1>Direct Influence Matrix — DEMATEL</h1>
+        </div>
+
+        <div class="content">
+            <div class="instruction-box">
+                <p>Rate how strongly each <strong>row factor</strong> directly influences each <strong>column factor</strong>. Diagonal cells (same factor) are disabled.</p>
+            </div>
+
+            <div class="rating-legend">
+                <div class="rating-item">
+                    <div class="rating-badge">0</div>
+                    <span>No influence</span>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-badge">1</div>
+                    <span>Low</span>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-badge">2</div>
+                    <span>Medium</span>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-badge">3</div>
+                    <span>High</span>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-badge">4</div>
+                    <span>Very High</span>
+                </div>
+            </div>
+
+            <form id="dematelForm">
+                <div class="matrix-container">
+                    <h2 class="matrix-title">Influence Matrix</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Influences →</th>
+                                <th>F1</th>
+                                <th>F2</th>
+                                <th>F3</th>
+                                <th>F4</th>
+                                <th>F5</th>
+                                <th>F6</th>
+                                <th>F7</th>
+                                <th>F8</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixBody">
+                            <!-- Matrix rows will be generated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="submit-container">
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        Submit Responses ↗
+                    </button>
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    ✓ Your responses have been submitted successfully!
+                </div>
+                <div class="error-message" id="errorMessage">
+                    ✗ An error occurred. Please try again.
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Factor definitions
+        const factors = [
+            { id: 'F1', name: 'Price & Cost Factors' },
+            { id: 'F2', name: 'Delivery & Logistics' },
+            { id: 'F3', name: 'Product-Related Factors' },
+            { id: 'F4', name: 'Website / App & Technology' },
+            { id: 'F5', name: 'Trust & Security' },
+            { id: 'F6', name: 'Payment & Transaction' },
+            { id: 'F7', name: 'Customer Service Quality' },
+            { id: 'F8', name: 'Social & Psychological Factors' }
+        ];
+
+        // Google Apps Script Web App URL - REPLACE THIS WITH YOUR DEPLOYED WEB APP URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkFcQWhU4u_crGMXUe-UwikHVAk8ieTnwWmjInLiMZqXqv3MovQVKmV4JaU5NST53Onw/exec';
+
+        // Generate matrix
+        function generateMatrix() {
+            const tbody = document.getElementById('matrixBody');
+            
+            factors.forEach((rowFactor, rowIndex) => {
+                const row = document.createElement('tr');
+                
+                // Row header
+                const headerCell = document.createElement('td');
+                headerCell.textContent = `${rowFactor.id}: ${rowFactor.name}`;
+                row.appendChild(headerCell);
+                
+                // Matrix cells
+                factors.forEach((colFactor, colIndex) => {
+                    const cell = document.createElement('td');
+                    const select = document.createElement('select');
+                    select.className = 'matrix-select';
+                    select.name = `${rowFactor.id}_${colFactor.id}`;
+                    select.id = `${rowFactor.id}_${colFactor.id}`;
+                    
+                    // Disable diagonal cells
+                    if (rowIndex === colIndex) {
+                        select.disabled = true;
+                        const option = document.createElement('option');
+                        option.value = '—';
+                        option.textContent = '—';
+                        select.appendChild(option);
+                    } else {
+                        // Add default option
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = '·';
+                        select.appendChild(defaultOption);
+                        
+                        // Add rating options
+                        for (let i = 0; i <= 4; i++) {
+                            const option = document.createElement('option');
+                            option.value = i;
+                            option.textContent = i;
+                            select.appendChild(option);
+                        }
+                        select.required = true;
+                    }
+                    
+                    cell.appendChild(select);
+                    row.appendChild(cell);
+                });
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Form submission
+        document.getElementById('dematelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            
+            // Hide messages
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Submitting... <span class="loading"></span>';
+            
+            // Collect form data
+            const formData = {
+                timestamp: new Date().toISOString(),
+                matrix: {}
+            };
+            
+            // Collect matrix data
+            factors.forEach((rowFactor, rowIndex) => {
+                factors.forEach((colFactor, colIndex) => {
+                    if (rowIndex !== colIndex) {
+                        const selectId = `${rowFactor.id}_${colFactor.id}`;
+                        const value = document.getElementById(selectId).value;
+                        formData.matrix[selectId] = value;
+                    }
+                });
+            });
+            
+            try {
+                // Send to Google Sheets
+                const formBody = new URLSearchParams();
+formBody.append("data", JSON.stringify(formData));
+
+const response = await fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    body: formBody
+});
+
+const result = await response.json();
+
+if (result.status === "success") {
+    successMsg.style.display = 'block';
+} else {
+    throw new Error(result.message);
+}
+                // Show success message
+                successMsg.style.display = 'block';
+                submitBtn.innerHTML = 'Submit Responses ↗';
+                submitBtn.disabled = false;
+                
+                // Reset form after 2 seconds
+                setTimeout(() => {
+                    this.reset();
+                    successMsg.style.display = 'none';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                errorMsg.style.display = 'block';
+                errorMsg.textContent = '✗ An error occurred: ' + error.message;
+                submitBtn.innerHTML = 'Submit Responses ↗';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Initialize matrix on page load
+        generateMatrix();
+    </script>
+</body>
+</html>
